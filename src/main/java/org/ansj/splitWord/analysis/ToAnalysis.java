@@ -1,27 +1,25 @@
 package org.ansj.splitWord.analysis;
 
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
-import org.ansj.recognition.arrimpl.AsianPersonRecognition;
+import org.ansj.recognition.arrimpl.PersonRecognition;
 import org.ansj.recognition.arrimpl.ForeignPersonRecognition;
 import org.ansj.recognition.arrimpl.NumRecognition;
 import org.ansj.recognition.arrimpl.UserDefineRecognition;
 import org.ansj.splitWord.Analysis;
 import org.ansj.util.AnsjReader;
 import org.ansj.util.Graph;
-import org.ansj.util.NameFix;
 import org.ansj.util.TermUtil.InsertTermType;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 标准分词
- * 
+ *
  * @author ansj
- * 
  */
 public class ToAnalysis extends Analysis {
 
@@ -35,18 +33,17 @@ public class ToAnalysis extends Analysis {
 				graph.walkPath();
 
 				// 数字发现
-				if (isNumRecognition && graph.hasNum) {
-					new NumRecognition().recognition(graph.terms);
+				if (isNumRecognition) {
+					new NumRecognition(isQuantifierRecognition && graph.hasNumQua).recognition(graph);
 				}
 
 				// 姓名识别
 				if (graph.hasPerson && isNameRecognition) {
 					// 亚洲人名识别
-					new AsianPersonRecognition().recognition(graph.terms);
+					new PersonRecognition().recognition(graph);
 					graph.walkPathByScore();
-					NameFix.nameAmbiguity(graph.terms);
 					// 外国人名识别
-					new ForeignPersonRecognition().recognition(graph.terms);
+					new ForeignPersonRecognition().recognition(graph);
 					graph.walkPathByScore();
 				}
 
@@ -57,7 +54,7 @@ public class ToAnalysis extends Analysis {
 			}
 
 			private void userDefineRecognition(final Graph graph, Forest... forests) {
-				new UserDefineRecognition(InsertTermType.SKIP, forests).recognition(graph.terms);
+				new UserDefineRecognition(InsertTermType.SKIP, forests).recognition(graph);
 				graph.rmLittlePath();
 				graph.walkPathByScore();
 			}
@@ -84,7 +81,7 @@ public class ToAnalysis extends Analysis {
 	public ToAnalysis(Reader reader) {
 		super.resetContent(new AnsjReader(reader));
 	}
-	
+
 	public static Result parse(String str) {
 		return new ToAnalysis().parseStr(str);
 	}

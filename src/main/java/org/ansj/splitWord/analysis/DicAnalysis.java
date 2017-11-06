@@ -1,28 +1,27 @@
 package org.ansj.splitWord.analysis;
 
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
-import org.ansj.recognition.arrimpl.AsianPersonRecognition;
+import org.ansj.library.NatureLibrary;
 import org.ansj.recognition.arrimpl.ForeignPersonRecognition;
 import org.ansj.recognition.arrimpl.NumRecognition;
+import org.ansj.recognition.arrimpl.PersonRecognition;
 import org.ansj.splitWord.Analysis;
 import org.ansj.util.AnsjReader;
 import org.ansj.util.Graph;
-import org.ansj.util.NameFix;
 import org.ansj.util.TermUtil;
 import org.ansj.util.TermUtil.InsertTermType;
 import org.nlpcn.commons.lang.tire.GetWord;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 默认用户自定义词性优先
- * 
- * @author ansj
  *
+ * @author ansj
  */
 public class DicAnalysis extends Analysis {
 
@@ -39,18 +38,17 @@ public class DicAnalysis extends Analysis {
 				graph.walkPath();
 
 				// 数字发现
-				if (isNumRecognition && graph.hasNum) {
-					new NumRecognition().recognition(graph.terms);
+				if (isNumRecognition) {
+					new NumRecognition(isQuantifierRecognition && graph.hasNumQua).recognition(graph);
 				}
 
 				// 姓名识别
 				if (graph.hasPerson && isNameRecognition) {
 					// 亚洲人名识别
-					new AsianPersonRecognition().recognition(graph.terms);
+					new PersonRecognition().recognition(graph);
 					graph.walkPathByScore();
-					NameFix.nameAmbiguity(graph.terms);
 					// 外国人名识别
-					new ForeignPersonRecognition().recognition(graph.terms);
+					new ForeignPersonRecognition().recognition(graph);
 					graph.walkPathByScore();
 				}
 
@@ -79,10 +77,17 @@ public class DicAnalysis extends Analysis {
 						if (graph.terms[word.offe] == null) {
 							continue;
 						}
+						Term tempTerm = graph.terms[word.offe];
 						tempFreq = getInt(word.getParam()[1], 50);
-						Term term = new Term(temp, beginOff + word.offe, word.getParam()[0], tempFreq);
-						term.selfScore(-1 * Math.pow(Math.log(tempFreq), temp.length()));
-						TermUtil.insertTerm(graph.terms, term, InsertTermType.REPLACE);
+						if (graph.terms[word.offe] != null && graph.terms[word.offe].getName().equals(temp)) {
+							tempTerm.termNatures().allFreq = tempFreq;
+							tempTerm.termNatures().nature = NatureLibrary.getNature(word.getParam()[0]);
+							tempTerm.setNature(tempTerm.termNatures().nature);
+						} else {
+							Term term = new Term(temp, beginOff + word.offe, word.getParam()[0], tempFreq);
+							term.selfScore(-1 * Math.pow(Math.log(tempFreq), temp.length()));
+							TermUtil.insertTerm(graph.terms, term, InsertTermType.REPLACE);
+						}
 					}
 				}
 				graph.rmLittlePath();
@@ -108,7 +113,6 @@ public class DicAnalysis extends Analysis {
 					}
 				}
 				setRealName(graph, result);
-
 				return result;
 			}
 		};

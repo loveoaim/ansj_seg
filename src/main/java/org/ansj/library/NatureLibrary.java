@@ -1,9 +1,5 @@
 package org.ansj.library;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.HashMap;
-
 import org.ansj.domain.Nature;
 import org.ansj.domain.Term;
 import org.ansj.util.MyStaticValue;
@@ -11,11 +7,15 @@ import org.nlpcn.commons.lang.util.StringUtil;
 import org.nlpcn.commons.lang.util.logging.Log;
 import org.nlpcn.commons.lang.util.logging.LogFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.HashMap;
+
 /**
  * 这里封装了词性和词性之间的关系.以及词性的索引.这是个好东西. 里面数组是从ict里面找来的. 不是很新.没有语料无法训练
- * 
+ *
  * @author ansj
- * 
+ *
  */
 public class NatureLibrary {
 
@@ -84,7 +84,7 @@ public class NatureLibrary {
 
 	/**
 	 * 获得两个词性之间的频率
-	 * 
+	 *
 	 * @param from
 	 * @param to
 	 * @return
@@ -98,7 +98,7 @@ public class NatureLibrary {
 
 	/**
 	 * 获得两个term之间的频率
-	 * 
+	 *
 	 * @param fromTerm
 	 * @param toTerm
 	 * @return
@@ -114,7 +114,7 @@ public class NatureLibrary {
 
 	/**
 	 * 根据字符串得道词性.没有就创建一个
-	 * 
+	 *
 	 * @param natureStr
 	 * @return
 	 */

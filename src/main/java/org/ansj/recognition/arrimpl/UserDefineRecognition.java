@@ -5,6 +5,7 @@ import org.ansj.domain.TermNature;
 import org.ansj.domain.TermNatures;
 import org.ansj.library.DicLibrary;
 import org.ansj.recognition.TermArrRecognition;
+import org.ansj.util.Graph;
 import org.ansj.util.TermUtil;
 import org.ansj.util.TermUtil.InsertTermType;
 import org.nlpcn.commons.lang.tire.domain.Forest;
@@ -14,9 +15,8 @@ import org.nlpcn.commons.lang.util.logging.LogFactory;
 
 /**
  * 用户自定义词典.又称补充词典
- * 
+ *
  * @author ansj
- * 
  */
 public class UserDefineRecognition implements TermArrRecognition {
 
@@ -24,7 +24,7 @@ public class UserDefineRecognition implements TermArrRecognition {
 
 	private Term[] terms = null;
 
-	private Forest[] forests = { DicLibrary.get() };
+	private Forest[] forests = {DicLibrary.get()};
 
 	private int offe = -1;
 	private int endOffe = -1;
@@ -45,8 +45,8 @@ public class UserDefineRecognition implements TermArrRecognition {
 	}
 
 	@Override
-	public void recognition(Term[] terms) {
-		this.terms = terms;
+	public void recognition(Graph graph) {
+		this.terms = graph.terms;
 		for (Forest forest : forests) {
 			if (forest == null) {
 				continue;
@@ -126,10 +126,25 @@ public class UserDefineRecognition implements TermArrRecognition {
 				sb.append(terms[j].getName());
 			}
 		}
+
 		TermNatures termNatures = new TermNatures(new TermNature(tempNature, tempFreq));
 		Term term = new Term(sb.toString(), offe, termNatures);
 		term.selfScore(-1 * tempFreq);
 		TermUtil.insertTerm(terms, term, type);
+
+		if (terms[offe].getRealNameIfnull() != null) { //后面增加了非原生graph的合并，所以需要补充realname
+			StringBuilder sb1 = new StringBuilder();
+			for (int j = offe; j <= endOffe; j++) {
+				if (terms[j] == null) {
+					continue;
+				} else {
+					sb1.append(terms[j].getRealName());
+				}
+			}
+			term.setRealName(sb1.toString());
+		}
+
+
 	}
 
 	/**
@@ -145,7 +160,7 @@ public class UserDefineRecognition implements TermArrRecognition {
 
 	/**
 	 * 传入一个term 返回这个term的状态
-	 * 
+	 *
 	 * @param branch
 	 * @param term
 	 * @return
