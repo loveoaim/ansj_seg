@@ -22,17 +22,20 @@ public class Graph {
 	public Term[] terms = null;
 	protected Term end = null;
 	protected Term root = null;
-	protected static final String E = "BEGIN";
-	protected static final String B = "END";
+	protected static final String B = "BEGIN";
+	protected static final String E = "END";
 	// 是否有人名
 	public boolean hasPerson;
 
 	public boolean hasNumQua;
 
+	public String str ;
+
 
 	// 是否需有歧异
 
 	public Graph(String str) {
+		this.str = str ;
 		this.chars = WordAlert.alertStr(str);
 		terms = new Term[chars.length + 1];
 		end = new Term(E, chars.length, AnsjItem.END);

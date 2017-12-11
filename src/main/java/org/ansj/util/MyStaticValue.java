@@ -45,11 +45,17 @@ public class MyStaticValue {
 	public static Boolean isRealName = false;
 
 	/**
+	 * 标记是否是新词
+	 */
+	public static boolean isNewWord = true;
+
+	/**
 	 * 是否用户辞典不加载相同的词
 	 */
 	public static boolean isSkipUserDefine = false;
 
 	public static final Map<String, String> ENV = new HashMap<>();
+
 
 	static {
 		/**
@@ -172,12 +178,21 @@ public class MyStaticValue {
 	}
 
 	/**
-	 * 词性关联表
+	 * 人名识别
 	 *
 	 * @return
 	 */
-	public static BufferedReader getPersonDicReader() {
-		return DicReader.getReader("person.txt");
+	public static BufferedReader getPersonDicReader() throws FileNotFoundException, UnsupportedEncodingException {
+		return IOUtil.getReader(new SequenceInputStream(DicReader.getInputStream("person/person.txt"), DicReader.getInputStream("person/person_split.txt")), "UTF-8");
+	}
+
+	/**
+	 * 人名识别
+	 *
+	 * @return
+	 */
+	public static BufferedReader getForeignDicReader() throws FileNotFoundException, UnsupportedEncodingException {
+		return IOUtil.getReader(new SequenceInputStream(DicReader.getInputStream("person/foreign.txt"), DicReader.getInputStream("person/person_split.txt")), "UTF-8");
 	}
 
 

@@ -2,8 +2,8 @@ package org.ansj.splitWord.analysis;
 
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
-import org.ansj.library.NatureLibrary;
-import org.ansj.recognition.arrimpl.ForeignPersonRecognition;
+import org.ansj.domain.TermNature;
+import org.ansj.domain.TermNatures;
 import org.ansj.recognition.arrimpl.NumRecognition;
 import org.ansj.recognition.arrimpl.PersonRecognition;
 import org.ansj.splitWord.Analysis;
@@ -44,11 +44,9 @@ public class DicAnalysis extends Analysis {
 
 				// 姓名识别
 				if (graph.hasPerson && isNameRecognition) {
-					// 亚洲人名识别
+					// 人名识别
 					new PersonRecognition().recognition(graph);
 					graph.walkPathByScore();
-					// 外国人名识别
-					new ForeignPersonRecognition().recognition(graph);
 					graph.walkPathByScore();
 				}
 
@@ -80,9 +78,8 @@ public class DicAnalysis extends Analysis {
 						Term tempTerm = graph.terms[word.offe];
 						tempFreq = getInt(word.getParam()[1], 50);
 						if (graph.terms[word.offe] != null && graph.terms[word.offe].getName().equals(temp)) {
-							tempTerm.termNatures().allFreq = tempFreq;
-							tempTerm.termNatures().nature = NatureLibrary.getNature(word.getParam()[0]);
-							tempTerm.setNature(tempTerm.termNatures().nature);
+							TermNatures termNatures = new TermNatures(new TermNature(word.getParam()[0],tempFreq),tempFreq, -1);
+							tempTerm.updateTermNaturesAndNature(termNatures);
 						} else {
 							Term term = new Term(temp, beginOff + word.offe, word.getParam()[0], tempFreq);
 							term.selfScore(-1 * Math.pow(Math.log(tempFreq), temp.length()));
@@ -108,8 +105,10 @@ public class DicAnalysis extends Analysis {
 				List<Term> result = new ArrayList<Term>();
 				int length = graph.terms.length - 1;
 				for (int i = 0; i < length; i++) {
-					if (graph.terms[i] != null) {
-						result.add(graph.terms[i]);
+					Term term = graph.terms[i];
+					if (term != null) {
+						setIsNewWord(term);
+						result.add(term);
 					}
 				}
 				setRealName(graph, result);

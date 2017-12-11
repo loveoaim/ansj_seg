@@ -52,8 +52,6 @@ public class AnsjItem extends Item implements Serializable{
 		if (status > 1) {
 			name = split[1];
 			termNatures = new TermNatures(split[5], index);
-		}else{
-			termNatures = new TermNatures(TermNature.NULL); 
 		}
 	}
 

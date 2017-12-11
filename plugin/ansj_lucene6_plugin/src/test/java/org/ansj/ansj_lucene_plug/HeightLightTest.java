@@ -73,7 +73,6 @@ public class HeightLightTest {
 	 * 
 	 * @param query
 	 * @param doc
-	 * @param field
 	 * @return
 	 */
 	private static String toHighlighter(Analyzer analyzer, Query query, Document doc) {

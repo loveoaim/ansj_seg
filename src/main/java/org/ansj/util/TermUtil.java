@@ -3,8 +3,8 @@ package org.ansj.util;
 import org.ansj.domain.Nature;
 import org.ansj.domain.Term;
 import org.ansj.domain.TermNatures;
+import org.ansj.library.DATDictionary;
 import org.ansj.library.NatureLibrary;
-import org.ansj.recognition.arrimpl.ForeignPersonRecognition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,12 +116,15 @@ public class TermUtil {
 
 	public static void insertTerm(Term[] terms, List<Term> tempList, TermNatures tns) {
 		StringBuilder sb = new StringBuilder();
-		int offe = tempList.get(0).getOffe();
 		for (Term term : tempList) {
 			sb.append(term.getName());
 			terms[term.getOffe()] = null;
 		}
-		Term term = new Term(sb.toString(), offe, tns);
+		Term term = new Term(sb.toString(), tempList.get(0).getOffe(), tns);
+
+		termLink(tempList.get(0),tempList.get(0).to());
+		termLink(term,tempList.get(tempList.size()-1).to());
+
 		insertTermNum(terms, term);
 	}
 
@@ -149,7 +152,7 @@ public class TermUtil {
 		}
 
 		// 是否是外国人名
-		if (ForeignPersonRecognition.isFName(name)) {
+		if (DATDictionary.foreign(term)) {
 			term.setNature(NatureLibrary.getNature("nrf"));
 			return;
 		}

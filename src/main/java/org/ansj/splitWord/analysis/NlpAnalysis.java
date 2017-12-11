@@ -4,7 +4,10 @@ import org.ansj.app.crf.SplitWord;
 import org.ansj.dic.LearnTool;
 import org.ansj.domain.*;
 import org.ansj.library.CrfLibrary;
-import org.ansj.recognition.arrimpl.*;
+import org.ansj.recognition.arrimpl.NewWordRecognition;
+import org.ansj.recognition.arrimpl.NumRecognition;
+import org.ansj.recognition.arrimpl.PersonRecognition;
+import org.ansj.recognition.arrimpl.UserDefineRecognition;
 import org.ansj.recognition.impl.NatureRecognition;
 import org.ansj.splitWord.Analysis;
 import org.ansj.util.AnsjReader;
@@ -58,12 +61,8 @@ public class NlpAnalysis extends Analysis {
 
 				// 姓名识别
 				if (graph.hasPerson && isNameRecognition) {
-					// 亚洲人名识别
+					// 人名识别
 					new PersonRecognition().recognition(graph);
-					graph.walkPathByScore();
-					// 外国人名识别
-					new ForeignPersonRecognition().recognition(graph);
-					graph.walkPathByScore();
 				}
 
 				if (splitWord != null) {
@@ -93,18 +92,12 @@ public class NlpAnalysis extends Analysis {
 							term = new Term(word, tempOff, termNatures);
 						} else {
 							term = new Term(word, tempOff, TermNatures.NW);
-							term.setNewWord(true);
 						}
 
 						tempOff += word.length(); // 增加偏移量
 						if (isRuleWord(word)) { // 如果word不对那么不要了
 							tempTerm = null;
 							continue;
-						}
-
-						if (term.isNewWord()) { // 尝试猜测词性
-							termNatures = NatureRecognition.guessNature(word);
-							term.updateTermNaturesAndNature(termNatures);
 						}
 
 						TermUtil.insertTerm(graph.terms, term, InsertTermType.SCORE_ADD_SORT);
@@ -150,9 +143,19 @@ public class NlpAnalysis extends Analysis {
 				// 优化后重新获得最优路径
 				result = getResult();
 
+
 				// 激活辞典
 				for (Term term : result) {
-					learn.active(term.getName());
+					if(term.isNewWord()) {
+						if("nw".equals(term.getNatureStr())) {
+							TermNatures termNatures = NatureRecognition.guessNature(term.getName());
+							if(!"nw".equals(termNatures.nature.natureStr)){
+								term.setNature(termNatures.nature);
+							}
+						}
+
+						learn.active(term.getName());
+					}
 				}
 
 				setRealName(graph, result);
@@ -168,6 +171,7 @@ public class NlpAnalysis extends Analysis {
 					if (graph.terms[i] == null) {
 						continue;
 					}
+					setIsNewWord(graph.terms[i]) ;
 					result.add(graph.terms[i]);
 				}
 				return result;
@@ -229,7 +233,7 @@ public class NlpAnalysis extends Analysis {
 			c = word.charAt(i);
 
 			if (c != '·') {
-				if (c < 256 || filter.contains(c) || (c = WordAlert.CharCover(word.charAt(i))) > 0) {
+				if ((c = WordAlert.CharCover(word.charAt(i))) < 256 || filter.contains(c) ) {
 					return true;
 				}
 			}

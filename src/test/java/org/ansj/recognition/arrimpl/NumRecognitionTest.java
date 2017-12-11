@@ -48,6 +48,15 @@ public class NumRecognitionTest {
 		System.out.println(ToAnalysis.parse("和天猫本年度"));
 
 
+		System.out.println(ToAnalysis.parse("12,345.60元"));
+
+
+		System.out.println(ToAnalysis.parse("3.2亿元"));
+
+		System.out.println(ToAnalysis.parse("pm2.5平方公里含量20mg"));
+
+
+
 
 
 	}
